@@ -1,7 +1,7 @@
 # Symfony
 Trying out symfony
 
-# Artefacts
+# Artifacts
 
 Basic DB UML https://docs.google.com/spreadsheets/d/1LgjEOncmeN_-AawaHfwe87q7SNcBD29ejHHqRSWqE_g/edit?usp=sharing
 
