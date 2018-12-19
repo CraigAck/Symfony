@@ -2,8 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Grp;
-
 /**
  * @todo move repo logic into these services
  *
