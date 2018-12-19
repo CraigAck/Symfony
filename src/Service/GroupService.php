@@ -2,6 +2,14 @@
 
 namespace App\Service;
 
+use App\Entity\Grp;
+
+/**
+ * @todo move repo logic into these services
+ *
+ * Class GroupService
+ * @package App\Service
+ */
 class GroupService
 {
     /**

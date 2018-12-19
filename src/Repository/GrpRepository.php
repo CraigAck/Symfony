@@ -9,6 +9,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
+ * @todo move business logic into services
+ *
  * @method Grp|null find($id, $lockMode = null, $lockVersion = null)
  * @method Grp|null findOneBy(array $criteria, array $orderBy = null)
  * @method Grp[]    findAll()
@@ -39,25 +41,45 @@ class GrpRepository extends ServiceEntityRepository
         $stmt = $conn->prepare($sql);
         $stmt->execute();
 
-        // returns an array of arrays (i.e. a raw data set)
         return $stmt->fetchAll();
     }
 
     /**
-     * @param string $name
-     * @return Grp
+     * @return array
      * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findOneWithMembers($id): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = '
+            SELECT g.id, g.name, u.id as userId, u.name AS userName 
+            FROM grp g
+            LEFT JOIN grps_users gu ON gu.grp_id_id = g.id
+            LEFT JOIN user u ON u.id = gu.user_id_id
+            WHERE g.id = '.$id.' -- should really be escaped
+        ';
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+
+    /**
+     * @param string $name
+     * @return array
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function create(string $name): array
+    public function create(string $name): Grp
     {
         $group = new Grp;
         $group->setName($name);
 
         $this->save($group);
 
-        return $this->findAllWithMembers();
+        return $group;
     }
 
     /**
@@ -105,13 +127,15 @@ class GrpRepository extends ServiceEntityRepository
             $this->_em->persist($grpUser);
             $this->_em->flush();
 
-            return $this->findAllWithMembers();
+            return $this->findOneWithMembers($id);
         }
 
         return null;
     }
 
     /**
+     * @todo create save/removes methods for $grpUser
+     *
      * @param $id
      * @param $userId
      * @return bool

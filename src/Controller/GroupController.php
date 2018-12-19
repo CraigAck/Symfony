@@ -3,9 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Grp;
-use App\Entity\GrpsUsers;
-use App\Entity\User;
-use App\Repository\GrpRepository;
 use App\Service\GroupService;
 use FOS\RestBundle\Controller\Annotations AS Rest;
 use FOS\RestBundle\Controller\FOSRestController;
@@ -35,6 +32,21 @@ class GroupController extends FOSRestController
     }
 
     /**
+     * Get single group
+     *
+     * @Rest\Get("/group/{id}")
+     * @return JsonResponse
+     */
+    public function getOne(int $id, GroupService $groupService): JsonResponse
+    {
+        $group = $this->getDoctrine()
+            ->getRepository(Grp::class)
+            ->findOneWithMembers($id);
+
+        return $this->json(['items' => $groupService->transform($group)], Response::HTTP_OK);
+    }
+
+    /**
      * Create a group
      *
      * @Rest\Post("/groups")
@@ -43,11 +55,11 @@ class GroupController extends FOSRestController
      */
     public function post(Request $request, GroupService $groupService): JsonResponse
     {
-        $groups = $this->getDoctrine()
+        $group = $this->getDoctrine()
             ->getRepository(Grp::class)
             ->create($request->get('name'));
 
-        return $this->json(["message" => "Group added successfully", "item" => $groupService->transform($groups)], Response::HTTP_OK);
+        return $this->json(["message" => "Group added successfully", "item" => $groupService->transformSingle($group)], Response::HTTP_OK);
     }
 
     /**
@@ -63,7 +75,7 @@ class GroupController extends FOSRestController
             ->getRepository(Grp::class)
             ->deleteGroup($request->get('id')))
         {
-            return $this->json(["message" => "Group deleted successfully"], Response::HTTP_OK);
+            return $this->json(["message" => ""], Response::HTTP_NO_CONTENT);
         }
 
         return $this->json(["message" => "Group not deleted - it is not empty"], Response::HTTP_BAD_REQUEST);
@@ -72,26 +84,26 @@ class GroupController extends FOSRestController
     /**
      * Add a user to a group
      *
-     * @Rest\Post("/groups/{id}/user")
+     * @Rest\Post("/group/{id}/user")
      * @param Request $request
      * @return JsonResponse
      */
     public function addUser(int $id, Request $request, GroupService $groupService): JsonResponse
     {
-        if ($groups = $this->getDoctrine()
+        if ($group = $this->getDoctrine()
             ->getRepository(Grp::class)
             ->addUser($id, $request->get('userId')))
         {
-            return $this->json(["message" => "User added to group", "items" => $groupService->transform($groups)], Response::HTTP_OK);
+            return $this->json(["message" => "User added to group", "items" => $groupService->transform($group)], Response::HTTP_OK);
         }
 
         return $this->json(["message" => "User already a member of that group"], Response::HTTP_BAD_REQUEST);
     }
 
     /**
-     * Add a user to a group
+     * Remove user from a group
      *
-     * @Rest\Delete("/groups/{id}/user")
+     * @Rest\Delete("/group/{id}/user")
      * @param Request $request
      * @return JsonResponse
      */
@@ -101,7 +113,7 @@ class GroupController extends FOSRestController
             ->getRepository(Grp::class)
             ->deleteUser($id, $request->get('userId')))
         {
-            return $this->json(["message" => "User removed from group successfully"], Response::HTTP_OK);
+            return $this->json(["message" => ""], Response::HTTP_NO_CONTENT);
         }
 
         return $this->json(["message" => "User is not part of that group"], Response::HTTP_BAD_REQUEST);

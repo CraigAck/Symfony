@@ -32,6 +32,21 @@ class UserController extends FOSRestController
     }
 
     /**
+     * Get single user by id
+     *
+     * @Rest\Get("/user/{id}")
+     * @return JsonResponse
+     */
+    public function getOne(int $id, UserService $userService): JsonResponse
+    {
+        $users = $this->getDoctrine()
+            ->getRepository(User::class)
+            ->find($id);
+
+        return $this->json(['items' => $userService->transformSingle($users)], Response::HTTP_OK);
+    }
+
+    /**
      * @Rest\Post("/users")
      * @param Request $request
      * @param UserService $userService
@@ -43,7 +58,7 @@ class UserController extends FOSRestController
             ->getRepository(User::class)
             ->create($request->get('name'));
 
-        return $this->json(["message" => "User added successfully", "item" => $userService->transform([$user])], Response::HTTP_OK);
+        return $this->json(["message" => "User added successfully", "item" => $userService->transform([$user])], Response::HTTP_CREATED);
     }
 
     /**
@@ -53,12 +68,12 @@ class UserController extends FOSRestController
      * @param Request $request
      * @return JsonResponse
      */
-    public function delete(Request $request, UserService $userService): JsonResponse
+    public function delete(Request $request): JsonResponse
     {
         $this->getDoctrine()
             ->getRepository(User::class)
             ->deleteUser($request->get('id'));
 
-        return $this->json(["message" => "User deleted successfully"], Response::HTTP_OK);
+        return $this->json(["message" => ""], Response::HTTP_NO_CONTENT);
     }
 }

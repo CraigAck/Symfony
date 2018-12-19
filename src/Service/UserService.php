@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Entity\User;
+
 class UserService
 {
     /**
@@ -13,12 +15,21 @@ class UserService
         $transformedUsers = [];
         foreach ($users as $user)
         {
-            $transformedUsers[] = [
-                'id'    => $user->getId(),
-                'name'  => $user->getName(),
-            ];
+            $transformedUsers[] = $this->transformSingle($user);
         }
 
         return $transformedUsers;
+    }
+
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function transformSingle(User $user): array
+    {
+        return  [
+            'id'    => $user->getId(),
+            'name'  => $user->getName(),
+        ];
     }
 }

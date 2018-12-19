@@ -30,7 +30,7 @@ class UserRepository extends ServiceEntityRepository
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function create(string $newName)
+    public function create(string $newName): User
     {
         $user = new User;
         $user->setName($newName);
