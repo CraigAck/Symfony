@@ -59,7 +59,7 @@ class GroupController extends FOSRestController
             ->getRepository(Grp::class)
             ->create($request->get('name'));
 
-        return $this->json(["message" => "Group added successfully", "item" => $groupService->transformSingle($group)], Response::HTTP_OK);
+        return $this->json(["message" => "Group added successfully", "item" => $groupService->transformSingle($group)], Response::HTTP_CREATED);
     }
 
     /**
@@ -94,10 +94,10 @@ class GroupController extends FOSRestController
             ->getRepository(Grp::class)
             ->addUser($id, $request->get('userId')))
         {
-            return $this->json(["message" => "User added to group", "items" => $groupService->transform($group)], Response::HTTP_OK);
+            return $this->json(["message" => "User added to group", "items" => $groupService->transform($group)], Response::HTTP_CREATED);
         }
 
-        return $this->json(["message" => "User already a member of that group"], Response::HTTP_BAD_REQUEST);
+        return $this->json(["message" => "User already a member of that group"], Response::HTTP_OK);
     }
 
     /**
